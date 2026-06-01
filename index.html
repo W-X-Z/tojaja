@@ -208,18 +208,18 @@ function c0(){
       title:"기관이 계속 사고 있어요",
       desc:"기관들이 8일 연속 사들였고, 외국인이 파는 양도 점점 줄었어요."},
     {t:"good",tag:"좋은 신호",icon:ICON_GOOD,land:"short",
-      title:"주가가 내릴 거란 베팅이 빠지고 있어요",
-      desc:"공매도 자금이 최근 크게 줄었어요."},
-    {t:"good",tag:"좋은 신호",icon:ICON_GOOD,land:"short",
       title:"공매도가 크게 줄었어요",
       desc:"공매도 비율이 낮아지면서, 하락에 베팅하던 물량도 함께 줄었어요."},
+    {t:"warn",tag:"주의할 점",icon:ICON_WARN,land:"credit",
+      title:"빚내서 사는 사람이 늘었어요",
+      desc:"요즘은 다소 비싸게 사는 구간이라, 가격이 흔들리면 평소보다 크게 출렁일 수 있어요."},
   ];
   return `
   <div class="mood">
     <div class="ml">지금 분위기</div>
-    <div class="mt">전반적으로 긍정적이에요</div>
-    <div class="mbar"><span class="mseg on"></span><span class="mseg on"></span><span class="mseg on"></span></div>
-    <div class="mlabels"><span>좋은 신호 3</span></div>
+    <div class="mt">대체로 긍정적이에요<br>다만 ‘과열’은 살펴보세요</div>
+    <div class="mbar"><span class="mseg on"></span><span class="mseg on"></span><span class="mseg warn"></span></div>
+    <div class="mlabels"><span>좋은 신호 2</span><span class="warn">주의 1</span></div>
   </div>
   ${cards.map(c=>`
     <button type="button" class="kcard" data-land="${c.land}">
