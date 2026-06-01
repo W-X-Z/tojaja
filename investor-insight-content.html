@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>투자자탭 AI 인사이트 · 콘텐츠 컨셉 갤러리</title>
+<style>
+  :root{
+    --up:#e23b3b; --down:#2f6fe8; --warn:#e8973a; --good:#1f9d6b;
+    --ink:#15171c; --ink2:#5a606b; --ink3:#9298a3; --line:#e9eaee;
+    --bg:#f3f4f7; --card:#fff; --soft:#f7f8fa;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    padding:30px 20px 60px;
+  }
+  .page-head{max-width:1180px;margin:0 auto 26px;}
+  .page-head h1{font-size:20px;margin:0 0 6px;letter-spacing:-.3px;}
+  .page-head p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.6;max-width:760px;}
+  .page-head .why{margin-top:10px;font-size:12.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-width:760px;}
+  .page-head .why b{color:var(--ink);}
+
+  .gallery{
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(332px,1fr));gap:30px 26px;
+  }
+  .item{display:flex;flex-direction:column;gap:10px;}
+  .cap{padding-left:2px;}
+  .cap .num{font-size:11px;font-weight:800;color:#fff;background:var(--ink);border-radius:6px;padding:2px 7px;letter-spacing:.4px;}
+  .cap .t{font-size:14.5px;font-weight:700;margin:7px 0 2px;letter-spacing:-.2px;}
+  .cap .d{font-size:12px;color:var(--ink2);line-height:1.5;}
+
+  /* 폰 프레임 */
+  .phone{
+    width:332px;background:#0c0d10;border-radius:30px;padding:8px;
+    box-shadow:0 16px 38px rgba(20,24,33,.18);align-self:center;
+  }
+  .scr{background:#fff;border-radius:24px;overflow:hidden;}
+  .ph-head{
+    display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);
+  }
+  .ph-head .tag{font-size:10.5px;font-weight:800;color:#fff;background:var(--ink);border-radius:5px;padding:2px 6px;letter-spacing:.4px;}
+  .ph-head .ttl{font-size:13.5px;font-weight:700;}
+  .ph-head .px{margin-left:auto;font-size:11px;color:var(--ink3);}
+  .body{padding:16px;}
+
+  h4.mh{font-size:13px;margin:0 0 10px;color:var(--ink2);font-weight:700;}
+  .lead{font-size:15px;line-height:1.55;font-weight:700;margin:0 0 14px;letter-spacing:-.3px;}
+  .up{color:var(--up);} .down{color:var(--down);} .warn{color:var(--warn);} .good{color:var(--good);}
+  b.up,b.down,b.warn,b.good{font-weight:800;}
+  .muted{color:var(--ink2);}
+  .src{font-size:10.5px;color:var(--ink3);margin-top:14px;line-height:1.5;}
+
+  /* 흐름 카드 (컨셉1) */
+  .flow{display:flex;gap:11px;padding:12px;border:1px solid var(--line);border-radius:13px;margin-bottom:10px;background:var(--soft);}
+  .flow .ic{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;}
+  .flow .ic.dn{background:var(--down);} .flow .ic.up{background:var(--up);} .flow .ic.nu{background:var(--ink3);}
+  .flow .fb .ft{font-size:13px;font-weight:700;margin-bottom:3px;}
+  .flow .fb .fd{font-size:12px;color:var(--ink2);line-height:1.5;}
+  .flow .fb .fd em{font-style:normal;font-weight:700;color:var(--ink);}
+  .verdict{background:#10131a;color:#eef1f6;border-radius:13px;padding:13px 14px;font-size:13px;line-height:1.6;}
+  .verdict b{color:#fff;}
+
+  /* 점수 게이지 (컨셉2) */
+  .gauge-wrap{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+  .gauge{position:relative;width:108px;height:108px;flex-shrink:0;}
+  .gauge .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge .val .n{font-size:28px;font-weight:800;letter-spacing:-1px;}
+  .gauge .val .s{font-size:10px;color:var(--ink3);}
+  .grade .gl{font-size:11px;color:var(--ink3);margin-bottom:3px;}
+  .grade .gt{font-size:15px;font-weight:800;line-height:1.35;letter-spacing:-.3px;}
+  .bar-row{margin-bottom:11px;}
+  .bar-row .br-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+  .bar-row .br-top .bn{color:var(--ink2);} .bar-row .br-top .bv{font-weight:700;}
+  .track{height:7px;background:#edeef2;border-radius:99px;overflow:hidden;}
+  .fillb{height:100%;border-radius:99px;}
+
+  /* 주체 카드 (컨셉3) */
+  .who{border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px;}
+  .who .wh{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .who .wh .nm{font-size:14px;font-weight:800;}
+  .who .wh .pl{margin-left:auto;font-size:12px;font-weight:800;padding:2px 8px;border-radius:99px;}
+  .pill-up{background:#fdecec;color:var(--up);} .pill-dn{background:#e9f0fe;color:var(--down);}
+  .who .pos{font-size:12px;color:var(--ink2);margin-bottom:7px;line-height:1.5;}
+  .who .intent{font-size:12.5px;line-height:1.55;}
+  .who .intent .lab{font-weight:800;color:var(--ink);}
+  .role{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;}
+  .role.smart{background:#e7f5ef;color:var(--good);} .role.exit{background:#e9f0fe;color:var(--down);}
+  .role.hot{background:#fdf0e3;color:var(--warn);} .role.pass{background:#eef0f3;color:var(--ink2);}
+
+  /* 매물대 지도 (컨셉4) */
+  .map{display:flex;gap:12px;}
+  .axis{position:relative;width:46px;flex-shrink:0;border-left:2px solid var(--line);}
+  .lvl{position:absolute;left:-2px;border-top:2px dashed #cfd3da;width:100%;}
+  .lvl .lt{position:absolute;left:8px;top:-9px;font-size:10px;color:var(--ink3);white-space:nowrap;}
+  .map-notes{flex:1;}
+  .wall{background:#eef0f3;border:1px solid var(--line);border-radius:11px;padding:11px;margin-bottom:10px;}
+  .wall .wt{font-size:12px;font-weight:800;margin-bottom:4px;}
+  .wall .wd{font-size:11.5px;color:var(--ink2);line-height:1.5;}
+  .pricebar{position:relative;width:78px;flex-shrink:0;border-radius:10px;overflow:hidden;background:linear-gradient(#fdecec,#fff 55%,#e9f0fe);border:1px solid var(--line);}
+  .marker{position:absolute;left:0;right:0;display:flex;align-items:center;}
+  .marker .ln{height:0;border-top:1.5px solid;flex:1;}
+  .marker .mt{position:absolute;font-size:9.5px;font-weight:700;background:#fff;padding:0 3px;border-radius:3px;}
+
+  /* 경보 (컨셉5) */
+  .alert{border-radius:13px;padding:14px;border:1px solid;}
+  .alert.lv-warn{background:#fef6ec;border-color:#f6dcb6;}
+  .alert .al-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--warn);margin-bottom:8px;}
+  .alert .badge{font-size:10.5px;font-weight:800;color:#fff;background:var(--warn);border-radius:6px;padding:2px 7px;}
+  .alert p{margin:0 0 8px;font-size:12.5px;line-height:1.6;color:#4a4030;}
+  .nuance{background:#fff;border:1px dashed #e3c79c;border-radius:9px;padding:9px 10px;font-size:11.5px;color:var(--ink2);line-height:1.5;}
+
+  /* Q&A (컨셉6) */
+  .qa{border:1px solid var(--line);border-radius:12px;margin-bottom:9px;overflow:hidden;}
+  .qa .q{display:flex;gap:8px;align-items:center;padding:12px 13px;cursor:pointer;font-size:13px;font-weight:700;background:var(--soft);}
+  .qa .q .qm{color:var(--down);font-weight:800;}
+  .qa .q .ch{margin-left:auto;color:var(--ink3);transition:transform .2s;}
+  .qa.open .q .ch{transform:rotate(180deg);}
+  .qa .a{display:none;padding:0 13px 13px;font-size:12.5px;line-height:1.6;color:var(--ink2);}
+  .qa.open .a{display:block;}
+  .qa .a .em{color:var(--ink);font-weight:700;}
+
+  /* 시나리오/체크 (컨셉7) */
+  .chk{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;line-height:1.5;}
+  .chk .mk{flex-shrink:0;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;margin-top:1px;}
+  .chk .mk.ok{background:var(--good);} .chk .mk.no{background:var(--warn);}
+  .scn{margin-top:13px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px;}
+  .scn .si{font-size:12.5px;line-height:1.6;margin-bottom:8px;}
+  .scn .si:last-child{margin-bottom:0;}
+  .scn .si .cond{font-weight:800;color:var(--ink);}
+  .scn .si.bull .cond{color:var(--up);} .scn .si.bear .cond{color:var(--down);}
+  .sec-h{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--ink3);margin:4px 0 4px;}
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>투자자탭 AI 인사이트 · 콘텐츠 컨셉 갤러리</h1>
+    <p>표/차트를 보면 바로 아는 수치가 아니라, <b>데이터를 해석해야 보이는 "더 깊은" 인사이트</b>를 어떤 콘텐츠로 만들 수 있을지 7가지 방향으로 시도한 모바일 상세화면 시안입니다. (현대차 005380 · 투자자탭 데이터만 사용)</p>
+    <div class="why"><b>핵심 차별점:</b> 단순 순매수 수치 → <b>흐름의 변화(매도 둔화·매수 가속), 주체의 의도, 손바뀜 구조, 매물대, 과열 신호, 조건부 시나리오</b>로 가공.</div>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+<script>
+/* ============ 데이터(해석 결과) ============ */
+const D = {
+  // 일평균 순매수(만주)
+  foreignAvg9:-15.7, foreignAvg5:-11.2,
+  instAvg9:6.0, instAvg5:11.2,
+  indivCum9:80.4, indivCum5:-3.1,
+  instStreak:8,
+  // 6개월 누적(만주)
+  cum:{indiv:1776, foreign:-2024, program:-1520, inst:112},
+  // 평단(만원)/현재가 대비 손익(%)
+  avg:{foreign:{p:64.0,pl:18.2}, inst:{p:64.2,pl:17.7}, indiv:{p:65.4,pl:15.6}, fin:{p:65.5,pl:15.3}},
+  price:75.6, chg9:28.4
+};
+
+/* ============ 컨셉 1 — 수급 스토리(흐름의 변화) ============ */
+function c1(){return `
+  <h4 class="mh">표에는 안 보이는 '흐름의 변화'</h4>
+  <p class="lead">최근 5거래일, 수급의 <span class="up">주인공이 바뀌는 중</span>이에요.</p>
+  <div class="flow">
+    <div class="ic dn">↓</div>
+    <div class="fb"><div class="ft down">외국인 — 매도세가 약해지고 있어요</div>
+      <div class="fd">일평균 순매도가 <em>−15.7만주(9일)</em> → <em>−11.2만주(5일)</em>로 줄었어요. 던지는 힘이 빠지는 중.</div></div>
+  </div>
+  <div class="flow">
+    <div class="ic up">↑</div>
+    <div class="fb"><div class="ft up">기관 — 매수에 가속이 붙었어요</div>
+      <div class="fd">일평균 순매수가 <em>+6.0만주(9일)</em> → <em>+11.2만주(5일)</em>, 게다가 <em>8거래일 연속</em> 순매수.</div></div>
+  </div>
+  <div class="flow">
+    <div class="ic nu">≈</div>
+    <div class="fb"><div class="ft">개인 — 슬슬 차익실현 시작</div>
+      <div class="fd">9일간 <em>+80만주</em> 사들였지만 최근 5일은 <em>−3만주</em>로 매수를 멈췄어요.</div></div>
+  </div>
+  <div class="verdict">외국인이 던지던 물량을 이제 <b>기관이 받아내고</b>, 개인은 <b>한 발 빼는</b> 손바뀜 국면.
+    파는 쪽 힘이 약해지는 신호로 읽을 수 있어요. <span style="opacity:.7">(추세 전환은 추가 확인 필요)</span></div>
+  <div class="src">출처: MTS 투자자탭(목업) · 일평균=기간 순매수합÷거래일</div>`;}
+
+/* ============ 컨셉 2 — 수급 건전성 점수 ============ */
+function c2(){
+  const score=58, C=2*Math.PI*46, off=C*(1-score/100);
+  const bars=[
+    {n:"기관 매집 강도",v:80,c:"var(--good)"},
+    {n:"외국인 흐름",v:38,c:"var(--down)"},
+    {n:"개인 쏠림(역지표)",v:40,c:"var(--warn)"},
+    {n:"가격·수급 정합성",v:50,c:"var(--ink3)"},
+  ];
+  return `
+  <h4 class="mh">수급 건전성 한눈에</h4>
+  <div class="gauge-wrap">
+    <div class="gauge">
+      <svg width="108" height="108" viewBox="0 0 108 108">
+        <circle cx="54" cy="54" r="46" fill="none" stroke="#edeef2" stroke-width="11"/>
+        <circle cx="54" cy="54" r="46" fill="none" stroke="var(--warn)" stroke-width="11"
+          stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"
+          transform="rotate(-90 54 54)"/>
+      </svg>
+      <div class="val"><div class="n">${score}</div><div class="s">/ 100</div></div>
+    </div>
+    <div class="grade">
+      <div class="gl">종합 진단</div>
+      <div class="gt">기관 주도 매집,<br>개인 과열은 주의</div>
+    </div>
+  </div>
+  ${bars.map(b=>`
+    <div class="bar-row">
+      <div class="br-top"><span class="bn">${b.n}</span><span class="bv">${b.v}</span></div>
+      <div class="track"><div class="fillb" style="width:${b.v}%;background:${b.c}"></div></div>
+    </div>`).join("")}
+  <div class="verdict" style="margin-top:14px">기관 매집은 <b>강하지만</b>, 현재가가 모든 평단을 15~18% 웃돌고 개인 쏠림이 커
+    <b>단기 과열</b> 구간으로 평가돼요.</div>
+  <div class="src">점수는 4개 신호를 가중 합산한 해석 지표(목업) · 절대 매수/매도 신호가 아닙니다.</div>`;}
+
+/* ============ 컨셉 3 — 주체별 '속마음' 카드 ============ */
+function c3(){
+  return `
+  <h4 class="mh">투자 주체는 지금 무슨 생각일까?</h4>
+  <div class="who">
+    <div class="wh"><span class="nm">외국인</span><span class="role exit">차익실현 마무리</span><span class="pl pill-up">평단 +18%</span></div>
+    <div class="pos">6개월 누적 <b class="down">−2,024만주</b> 순매도 · 평단 약 64.0만원</div>
+    <div class="intent"><span class="lab">해석:</span> 이미 대량으로 차익을 실현해 보유를 크게 줄였어요. 그만큼 <b>추가로 던질 물량과 매도 강도는 둔화</b> 중 → 매물 압력은 점차 약해질 수 있어요.</div>
+  </div>
+  <div class="who">
+    <div class="wh"><span class="nm">기관</span><span class="role smart">스마트머니 매집</span><span class="pl pill-up">평단 +18%</span></div>
+    <div class="pos">최근 <b class="up">8거래일 연속</b> 순매수 · 매수 가속</div>
+    <div class="intent"><span class="lab">해석:</span> 외국인이 내놓는 물량을 받아내는 주체. 단기 수급의 <b>버팀목</b> 역할이라 하방을 지지하는 힘이 됩니다.</div>
+  </div>
+  <div class="who">
+    <div class="wh"><span class="nm">개인</span><span class="role hot">고점 대량매수</span><span class="pl pill-up">평단 +16%</span></div>
+    <div class="pos">6개월 누적 <b class="up">+1,776만주</b> · 평단 65.4만원(아직 수익)</div>
+    <div class="intent"><span class="lab">해석:</span> 상승 구간에서 대량 매수 = <b class="warn">과열 신호</b>지만, 아직 수익 구간이라 투매 위험은 낮아요. 다만 최근 차익실현 조짐.</div>
+  </div>
+  <div class="who">
+    <div class="wh"><span class="nm">프로그램</span><span class="role pass">패시브 이탈</span><span class="pl pill-dn">매도</span></div>
+    <div class="pos">6개월 누적 <b class="down">−1,520만주</b></div>
+    <div class="intent"><span class="lab">해석:</span> 차익·패시브 자금 이탈로 외국인 매도와 같은 방향. 수급 부담 요인이지만 강도는 외국인과 함께 둔화 관찰 중.</div>
+  </div>
+  <div class="src">출처: MTS 투자자탭(목업) · 의도는 데이터 기반 추정입니다.</div>`;}
+
+/* ============ 컨셉 4 — 매물대 지도(지지·저항) ============ */
+function c4(){
+  return `
+  <h4 class="mh">평단으로 보는 매물대 지도</h4>
+  <div class="map">
+    <div class="pricebar" style="height:230px">
+      <div class="marker" style="top:8%"><div class="ln" style="border-color:var(--up)"></div><div class="mt" style="right:2px;color:var(--up)">현재가 75.6만</div></div>
+      <div class="marker" style="top:66%"><div class="ln" style="border-color:var(--ink3)"></div><div class="mt" style="right:2px">금융 65.5</div></div>
+      <div class="marker" style="top:72%"><div class="ln" style="border-color:var(--ink3)"></div><div class="mt" style="right:2px">개인 65.4</div></div>
+      <div class="marker" style="top:80%"><div class="ln" style="border-color:var(--ink3)"></div><div class="mt" style="right:2px">기관 64.2</div></div>
+      <div class="marker" style="top:86%"><div class="ln" style="border-color:var(--ink3)"></div><div class="mt" style="right:2px">외국인 64.0</div></div>
+    </div>
+    <div class="map-notes">
+      <div class="wall">
+        <div class="wt good">64~65.5만원 = 강한 지지대</div>
+        <div class="wd">4개 주체 평균 매수가가 좁은 구간에 <b>몰려 있어요</b>. 주가가 눌릴 때 이 부근에서 매수 대기 수요가 받쳐줄 가능성.</div>
+      </div>
+      <div class="wall" style="background:#fdf0ee;border-color:#f3cfca">
+        <div class="wt up">현재가는 전원 평단 위 = 차익 매물권</div>
+        <div class="wd">지금 가격은 모든 주체 평단보다 <b>15~18% 높아요</b>. 위로 갈수록 차익 실현 매물이 나오기 쉬운 위치.</div>
+      </div>
+    </div>
+  </div>
+  <div class="src">출처: MTS 투자자탭 평균단가(목업) · 평단=매수단가 기준</div>`;}
+
+/* ============ 컨셉 5 — 컨트래리언 경보(개인 과열) ============ */
+function c5(){
+  return `
+  <h4 class="mh">개인 쏠림 경보</h4>
+  <div class="alert lv-warn">
+    <div class="al-h"><span class="badge">주의</span> 개인 매수 쏠림이 이례적으로 큽니다</div>
+    <p>6개월 누적 개인 순매수 <b class="up">+1,776만주</b> — 외국인·프로그램이 내놓은 물량(<b class="down">−3,544만주</b>)의 절반을 개인이 받아냈어요.</p>
+    <p>역사적으로 <b>개인의 대량 순매수가 집중되는 구간은 단기 천장 부근</b>인 경우가 많아, 흔히 '컨트래리언(역발상) 신호'로 봅니다.</p>
+    <div class="nuance"><b>다만</b> 개인 평단(65.4만)이 현재가보다 낮아 아직 수익 구간 → 즉각적인 투매 가능성은 낮습니다. '과열은 맞지만 붕괴 임박은 아님'으로 해석하는 게 균형적이에요.</div>
+  </div>
+  <div class="src">출처: MTS 투자자탭(목업) · 컨트래리언 해석은 통계적 경향이며 보장이 아닙니다.</div>`;}
+
+/* ============ 컨셉 6 — Q&A형 ============ */
+function c6(){
+  const qa=[
+    {q:"외국인이 파는데 지금 사도 되나요?",
+     a:"외국인은 <span class='em'>매도 중이지만 강도가 둔화</span>되고 있고(일평균 −15.7→−11.2만주), 그 물량을 <span class='em'>기관이 8거래일 연속 받아내는</span> 중이에요. 파는 쪽 힘은 약해지지만, 현재가가 과열 구간이라 '추격 매수'는 분할·신중하게 보는 시각이 많습니다."},
+    {q:"지금 들어가면 비싸게 사는 건가요?",
+     a:"네, 상대적으로 높아요. 현재가 75.6만원은 <span class='em'>외국인·개인·기관·금융 네 주체 평단보다 모두 15~18% 위</span>입니다. 신규 진입 시 가장 비싼 가격대에 사는 셈이에요."},
+    {q:"눌리면 어디서 지지받나요?",
+     a:"<span class='em'>64~65.5만원</span> 구간에 네 주체 평단이 밀집해 있어, 되돌림 시 매수 대기 수요가 몰릴 수 있는 1차 지지대로 봅니다."},
+    {q:"가장 중요한 관전 포인트는?",
+     a:"<span class='em'>외국인 매도가 순매수로 전환되는 시점</span>과 <span class='em'>개인 매도 가속 여부</span>예요. 기관 단독 매수만으로 끌고 갈지, 외국인이 합류할지가 추세의 분기점입니다."},
+  ];
+  return `
+  <h4 class="mh">투자자가 진짜 궁금한 것</h4>
+  ${qa.map((x,i)=>`
+    <div class="qa${i===0?' open':''}" data-qa>
+      <div class="q"><span class="qm">Q.</span>${x.q}<span class="ch">▾</span></div>
+      <div class="a">${x.a}</div>
+    </div>`).join("")}
+  <div class="src">출처: MTS 투자자탭(목업) · 일반 정보 제공이며 투자 권유가 아닙니다.</div>`;}
+
+/* ============ 컨셉 7 — 신호 체크 & 조건부 시나리오 ============ */
+function c7(){
+  return `
+  <h4 class="mh">신호 점검 & 앞으로의 시나리오</h4>
+  <div class="sec-h">강세 신호</div>
+  <div class="chk"><span class="mk ok">✓</span><div>기관 <b>8거래일 연속</b> 순매수 (매집 가속)</div></div>
+  <div class="chk"><span class="mk ok">✓</span><div>외국인 매도세 <b>둔화</b> (일평균 −15.7→−11.2만주)</div></div>
+  <div class="chk"><span class="mk ok">✓</span><div>개인 평단이 현재가 아래 → <b>투매 압력 낮음</b></div></div>
+  <div class="sec-h" style="margin-top:12px">약세 신호</div>
+  <div class="chk"><span class="mk no">!</span><div>주가 +28%인데 외국인 순매도 → <b>가격·수급 다이버전스</b></div></div>
+  <div class="chk"><span class="mk no">!</span><div>현재가가 <b>모든 평단 위</b> (차익 매물 부담)</div></div>
+  <div class="chk"><span class="mk no">!</span><div>개인 누적 매수 과다 → <b>단기 과열</b></div></div>
+  <div class="scn">
+    <div class="si bull"><span class="cond">IF 외국인 순매수 전환</span> → 기관과 쌍끌이로 추세 강화 가능성.</div>
+    <div class="si bear"><span class="cond">IF 개인·기관 동반 매도</span> → 64~65만 평단대까지 단기 조정 경계.</div>
+    <div class="si"><span class="cond">관전 포인트</span> 외국인 매도 강도와 기관 연속 매수 지속 여부.</div>
+  </div>
+  <div class="src">출처: MTS 투자자탭(목업) · 시나리오는 가정이며 예측이 아닙니다.</div>`;}
+
+/* ============ 렌더 ============ */
+const CONCEPTS=[
+  {n:"01",t:"수급 스토리 브리핑",d:"수치가 아니라 '흐름의 변화(둔화·가속·전환)'를 이야기로",fn:c1,px:"흐름"},
+  {n:"02",t:"수급 건전성 점수",d:"여러 신호를 하나의 점수·등급으로 종합 진단",fn:c2,px:"점수"},
+  {n:"03",t:"주체별 '속마음' 카드",d:"각 주체의 포지션·평단으로 의도와 향후를 추정",fn:c3,px:"의도"},
+  {n:"04",t:"매물대 지도",d:"평단 밀집 = 지지/저항으로 가격 위치 해석",fn:c4,px:"매물대"},
+  {n:"05",t:"개인 과열 경보",d:"개인 쏠림을 컨트래리언 관점으로 (뉘앙스 포함)",fn:c5,px:"경보"},
+  {n:"06",t:"Q&A형",d:"'사도 되나요?' 같은 진짜 질문에 데이터로 답",fn:c6,px:"Q&A"},
+  {n:"07",t:"신호 체크 & 시나리오",d:"강세/약세 신호 점검 + 조건부 시나리오",fn:c7,px:"시나리오"},
+];
+const g=document.getElementById("gallery");
+g.innerHTML=CONCEPTS.map(c=>`
+  <div class="item">
+    <div class="cap"><span class="num">CONCEPT ${c.n}</span>
+      <div class="t">${c.t}</div><div class="d">${c.d}</div></div>
+    <div class="phone"><div class="scr">
+      <div class="ph-head"><span class="tag">AI</span><span class="ttl">수급 인사이트 · 현대차</span><span class="px">${c.px}</span></div>
+      <div class="body">${c.fn()}</div>
+    </div></div>
+  </div>`).join("");
+
+// Q&A 아코디언
+g.addEventListener("click",e=>{
+  const q=e.target.closest(".qa .q"); if(!q)return;
+  q.parentElement.classList.toggle("open");
+});
+</script>
+</body>
+</html>

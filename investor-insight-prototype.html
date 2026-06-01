@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>투자자탭 AI 인사이트 · 인터랙션 프로토타입</title>
+<style>
+  :root {
+    --up: #e23b3b;      /* 상승/순매수 (빨강) */
+    --down: #2f6fe8;    /* 하락/순매도 (파랑) */
+    --ink: #15171c;
+    --ink2: #5a606b;
+    --ink3: #8b919c;
+    --line: #ececf0;
+    --bg: #eef0f4;
+    --card: #ffffff;
+    --accent: #111418;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+      "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 28px 16px 48px;
+  }
+  .head { text-align: center; margin-bottom: 18px; }
+  .head h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.2px; }
+  .head p { margin: 0; color: var(--ink2); font-size: 13px; }
+
+  /* 컨트롤 바 */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    margin-bottom: 22px;
+  }
+  .ctl { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .ctl .lbl { font-size: 11px; color: var(--ink3); letter-spacing: .3px; }
+  .seg {
+    display: inline-flex; background: #e2e5eb; border-radius: 10px; padding: 3px;
+  }
+  .seg button {
+    border: 0; background: transparent; cursor: pointer;
+    font-size: 12.5px; color: var(--ink2); padding: 6px 12px; border-radius: 8px;
+    font-weight: 600; transition: all .15s ease;
+  }
+  .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+  /* 폰 목업 */
+  .phone {
+    position: relative; width: 360px; height: 780px;
+    border-radius: 38px; overflow: hidden;
+    background: #000; border: 10px solid #0c0d10;
+    box-shadow: 0 24px 60px rgba(20,24,33,.28);
+  }
+  .phone img.screen {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    display: block; user-select: none; -webkit-user-drag: none;
+  }
+
+  /* 플로팅 버튼 (FAB) */
+  .fab {
+    position: absolute; right: 16px; bottom: 96px; z-index: 6;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff;
+    border: 0; cursor: pointer;
+    padding: 12px 16px; border-radius: 999px;
+    font-size: 14px; font-weight: 700; letter-spacing: -0.2px;
+    box-shadow: 0 8px 22px rgba(17,20,24,.4);
+    transition: transform .15s ease, opacity .2s ease;
+  }
+  .fab:active { transform: scale(.96); }
+  .fab .spark {
+    width: 16px; height: 16px; display: inline-block;
+    background: conic-gradient(from 0deg, #ffd34d, #ff8a3d, #ffd34d);
+    -webkit-mask: radial-gradient(circle at 50% 50%, transparent 2px, #000 2.5px) ,
+      conic-gradient(#000 0 0);
+    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  }
+
+  /* 공통 인사이트 콘텐츠 */
+  .insight-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .insight-head .tag {
+    font-size: 11px; font-weight: 800; letter-spacing: .4px; color: #fff;
+    background: var(--accent); padding: 3px 8px; border-radius: 6px;
+  }
+  .insight-head .ttl { font-size: 14px; font-weight: 700; }
+  .insight-head .close {
+    margin-left: auto; border: 0; background: #f1f2f5; color: var(--ink2);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 15px;
+  }
+  .headline { font-size: 15.5px; line-height: 1.55; font-weight: 600; color: var(--ink); margin: 0 0 14px; letter-spacing: -0.2px; }
+  .headline b.up { color: var(--up); }
+  .headline b.down { color: var(--down); }
+
+  .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .chip {
+    border: 1px solid var(--line); border-radius: 12px; padding: 9px 4px; text-align: center; background: #fafbfc;
+  }
+  .chip .c-l { font-size: 11px; color: var(--ink3); margin-bottom: 3px; }
+  .chip .c-v { font-size: 14px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap; }
+  .chip .c-v.up { color: var(--up); }
+  .chip .c-v.down { color: var(--down); }
+
+  .callout {
+    background: #eef4ff; border: 1px solid #d8e6ff; border-radius: 12px;
+    padding: 11px 12px; margin-bottom: 12px;
+  }
+  .callout .co-t { font-size: 12px; font-weight: 800; color: var(--down); margin-bottom: 3px; }
+  .callout .co-b { font-size: 12.5px; line-height: 1.5; color: #2c3340; }
+
+  .more-btn {
+    width: 100%; border: 1px solid var(--line); background: #fff; cursor: pointer;
+    border-radius: 10px; padding: 9px; font-size: 12.5px; font-weight: 700; color: var(--ink2);
+  }
+  .detail { margin-top: 10px; display: none; }
+  .detail.open { display: block; }
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.mini th, table.mini td { padding: 6px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+  table.mini th { color: var(--ink3); font-weight: 600; font-size: 11px; }
+  table.mini td:first-child, table.mini th:first-child { text-align: left; color: var(--ink2); }
+  td.up { color: var(--up); } td.down { color: var(--down); } td.zero { color: var(--ink3); }
+  .src { font-size: 10.5px; color: var(--ink3); margin-top: 10px; text-align: center; }
+
+  /* 바텀시트 */
+  .backdrop {
+    position: absolute; inset: 0; z-index: 7; background: rgba(10,12,16,.4);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  }
+  .backdrop.show { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
+    background: var(--card); border-radius: 22px 22px 0 0;
+    padding: 10px 18px 22px; max-height: 78%; overflow-y: auto;
+    transform: translateY(102%); transition: transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .sheet.show { transform: translateY(0); }
+  .grip { width: 40px; height: 4px; border-radius: 99px; background: #d7dae1; margin: 4px auto 14px; }
+
+  /* 플로팅 카드 */
+  .fcard {
+    position: absolute; left: 18px; right: 18px; top: 300px; z-index: 8;
+    background: var(--card); border-radius: 18px; padding: 16px 16px 18px;
+    box-shadow: 0 18px 44px rgba(17,20,24,.32);
+    transform: translateY(8px) scale(.96); opacity: 0; pointer-events: none;
+    transition: transform .22s ease, opacity .22s ease;
+  }
+  .fcard.show { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+  .fcard::after {
+    content: ""; position: absolute; top: -9px; right: 38px;
+    width: 18px; height: 18px; background: var(--card); transform: rotate(45deg);
+  }
+
+  .hint { margin-top: 18px; font-size: 12px; color: var(--ink3); text-align: center; max-width: 360px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>투자자탭 AI 인사이트 · 인터랙션 프로토타입</h1>
+    <p>실제 MTS 화면 위에 AI 수급 요약을 팝업/카드로 띄우는 시안 (현대차 005380)</p>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <span class="lbl">노출 방식</span>
+      <div class="seg" id="styleSeg">
+        <button data-style="sheet" class="on">바텀시트 팝업</button>
+        <button data-style="card">플로팅 카드</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">배경 화면</span>
+      <div class="seg" id="bgSeg">
+        <button data-bg="Screenshot_20260601_151046.jpg" class="on">투자자 표</button>
+        <button data-bg="Screenshot_20260601_151050.jpg">누적 차트</button>
+        <button data-bg="Screenshot_20260601_151103.jpg">평균단가</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="phone" id="phone">
+    <img class="screen" id="screen" src="Screenshot_20260601_151046.jpg" alt="MTS 투자자탭 화면" />
+
+    <button class="fab" id="fab"><span class="spark"></span>AI 요약</button>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- 바텀시트 -->
+    <div class="sheet" id="sheet">
+      <div class="grip"></div>
+      <div class="insight-head">
+        <span class="tag">AI</span>
+        <span class="ttl">수급 요약 · 현대차</span>
+        <button class="close" data-close>&times;</button>
+      </div>
+      <div id="bodySheet"></div>
+    </div>
+
+    <!-- 플로팅 카드 -->
+    <div class="fcard" id="fcard">
+      <div class="insight-head">
+        <span class="tag">AI</span>
+        <span class="ttl">수급 요약</span>
+        <button class="close" data-close>&times;</button>
+      </div>
+      <div id="bodyCard"></div>
+    </div>
+  </div>
+
+  <p class="hint">
+    우측 하단 <b>AI 요약</b> 버튼을 누르면 인사이트가 떠요. 상단에서 노출 방식(팝업/카드)과 배경 화면을 바꿔가며 비교할 수 있습니다.
+    데이터는 스크린샷 기반 목업입니다.
+  </p>
+
+<script>
+  // ---- 인사이트 콘텐츠 (현대차 5거래일 수급) ----
+  function insightHTML(withDetail) {
+    return `
+      <p class="headline">
+        최근 5거래일, <b class="up">기관</b>이 약 <b class="up">+56.1만주</b>를 사들이며 수급을 주도했고
+        <b class="down">외국인</b>은 약 <b class="down">−56.0만주</b> 순매도했어요.
+        같은 기간 주가는 <b class="up">+15.4%</b> 올랐습니다.
+      </p>
+      <div class="chips">
+        <div class="chip"><div class="c-l">외국인 5일</div><div class="c-v down">−56.0만주</div></div>
+        <div class="chip"><div class="c-l">개인 5일</div><div class="c-v down">−3.1만주</div></div>
+        <div class="chip"><div class="c-l">기관 5일</div><div class="c-v up">+56.1만주</div></div>
+      </div>
+      <div class="callout">
+        <div class="co-t">평균단가로 본 한마디</div>
+        <div class="co-b">외국인 평균 매수가 639,740원 대비 현재가가 <b>+18.2%</b> 높아요. 외국인 입장에선 차익 실현 유인이 큰 구간입니다.</div>
+      </div>
+      ${withDetail ? `
+      <button class="more-btn" data-more>자세히 보기 (일자별 순매수) ▾</button>
+      <div class="detail" data-detail>
+        <table class="mini">
+          <thead><tr><th>일자</th><th>외국인</th><th>개인</th><th>기관</th></tr></thead>
+          <tbody>
+            <tr><td>06/01</td><td class="down">−11.4</td><td class="zero">0.0</td><td class="up">+10.3</td></tr>
+            <tr><td>05/29</td><td class="up">+24.1</td><td class="down">−59.3</td><td class="up">+34.2</td></tr>
+            <tr><td>05/28</td><td class="down">−59.7</td><td class="up">+54.1</td><td class="up">+0.8</td></tr>
+            <tr><td>05/27</td><td class="down">−36.4</td><td class="up">+37.1</td><td class="up">+1.2</td></tr>
+            <tr><td>05/26</td><td class="up">+27.4</td><td class="down">−34.9</td><td class="up">+9.6</td></tr>
+          </tbody>
+        </table>
+        <div class="src">단위: 만주 · 출처: MTS 투자자탭(목업)</div>
+      </div>` : `<div class="src">출처: MTS 투자자탭(목업) · 최근 5거래일</div>`}
+    `;
+  }
+
+  document.getElementById('bodySheet').innerHTML = insightHTML(true);
+  document.getElementById('bodyCard').innerHTML = insightHTML(false);
+
+  // ---- 상태 ----
+  let style = 'sheet';
+  const phone = document.getElementById('phone');
+  const fab = document.getElementById('fab');
+  const backdrop = document.getElementById('backdrop');
+  const sheet = document.getElementById('sheet');
+  const fcard = document.getElementById('fcard');
+
+  function open() {
+    backdrop.classList.add('show');
+    fab.style.opacity = '0';
+    fab.style.pointerEvents = 'none';
+    if (style === 'sheet') sheet.classList.add('show');
+    else fcard.classList.add('show');
+  }
+  function close() {
+    backdrop.classList.remove('show');
+    sheet.classList.remove('show');
+    fcard.classList.remove('show');
+    fab.style.opacity = '1';
+    fab.style.pointerEvents = 'auto';
+  }
+
+  fab.addEventListener('click', open);
+  backdrop.addEventListener('click', close);
+  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+
+  // 자세히 보기 토글 (이벤트 위임)
+  phone.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-more]');
+    if (!m) return;
+    const d = m.parentElement.querySelector('[data-detail]');
+    const opened = d.classList.toggle('open');
+    m.textContent = opened ? '접기 ▴' : '자세히 보기 (일자별 순매수) ▾';
+  });
+
+  // 노출 방식 토글
+  document.getElementById('styleSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#styleSeg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    style = b.dataset.style;
+    close();
+  });
+
+  // 배경 화면 토글
+  document.getElementById('bgSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#bgSeg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('screen').src = b.dataset.bg;
+  });
+</script>
+</body>
+</html>
