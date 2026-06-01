@@ -52,24 +52,26 @@
   .src{font-size:10px;color:var(--ink3);margin-top:12px;}
   .headline{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.45;margin:0 0 16px;}
 
-  /* 핵심 3 (호재/악재) */
-  .verdict{display:flex;align-items:center;gap:8px;margin:0 0 14px;}
-  .verdict .vc{font-size:13px;font-weight:800;padding:5px 12px;border-radius:99px;}
-  .vc-good{background:#fdecec;color:var(--up);}
-  .vc-bad{background:#e9f0fe;color:var(--down);}
-  .verdict .vt{font-size:12px;color:var(--ink2);}
-  .tri{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:13px 14px;margin-bottom:10px;}
-  .tri.good{border-left-color:var(--up);}
-  .tri.bad{border-left-color:var(--down);}
-  .tri-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-  .tri-badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;}
-  .b-good{background:#fdecec;color:var(--up);}
-  .b-bad{background:#e9f0fe;color:var(--down);}
-  .tri-rank{margin-left:auto;font-size:11px;font-weight:700;color:var(--ink3);}
-  .tri-h{font-size:14.5px;font-weight:800;letter-spacing:-.3px;margin:0 0 9px;line-height:1.35;}
-  .tri-stat{display:inline-flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
-  .tri-stat .ts{font-size:11.5px;font-weight:700;background:var(--soft);border-radius:7px;padding:4px 9px;}
-  .tri-one{font-size:12px;color:var(--ink2);line-height:1.45;margin:0;}
+  /* 핵심 3가지 (초보자용 · 모던) */
+  .mood{border-radius:18px;padding:15px 16px;background:#f2f7f3;border:1px solid #e2eee7;margin-bottom:18px;}
+  .mood .ml{font-size:11.5px;font-weight:800;color:#1a8f60;letter-spacing:.3px;}
+  .mood .mt{font-size:17px;font-weight:800;letter-spacing:-.4px;margin:5px 0 13px;color:var(--ink);line-height:1.3;}
+  .mood .mbar{display:flex;gap:5px;}
+  .mood .mseg{flex:1;height:7px;border-radius:99px;background:#dde7e1;}
+  .mood .mseg.on{background:#28a36f;}
+  .mood .mseg.warn{background:#e8973a;}
+  .mood .mlabels{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--ink3);margin-top:7px;}
+  .kcard{display:flex;gap:13px;padding:15px;border-radius:18px;background:#fff;border:1px solid #eef0f3;box-shadow:0 6px 16px rgba(20,24,33,.05);margin-bottom:11px;}
+  .kicon{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .kicon.good{background:#e7f6ee;}
+  .kicon.warn{background:#fdf1e3;}
+  .kbody{flex:1;min-width:0;}
+  .ktag{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:99px;margin-bottom:7px;letter-spacing:.2px;}
+  .ktag.good{background:#e7f6ee;color:#1a8f60;}
+  .ktag.warn{background:#fdf1e3;color:#cf7d1e;}
+  .ktitle{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.35;margin:0 0 5px;}
+  .kdesc{font-size:12.5px;color:var(--ink2);line-height:1.55;margin:0;}
+  .knote{font-size:11px;color:var(--ink3);text-align:center;margin-top:15px;line-height:1.5;}
 
   /* 배지 그리드 (스코어보드) */
   .bgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
@@ -179,33 +181,38 @@
 <script>
 const state={concept:"c0",subject:"foreign"};
 
-/* ---------- C0 핵심 3 (호재·악재) ---------- */
+/* ---------- C0 핵심 3가지 (초보자용) ---------- */
 function c0(){
-  const items=[
-    {t:"good",rank:"중요도 1",h:"기관이 받치고, 외국인 매도는 힘 빠지는 중",
-      stat:["기관 8거래일 연속 매수","외국인 −16→−12만주/일"],
-      one:"파는 힘(외국인)은 약해지고 받치는 힘(기관)은 강해지는, 상승의 핵심 동력."},
-    {t:"good",rank:"중요도 2",h:"공매도가 발을 빼고 있어요",
-      stat:["공매도비율 5.5%→1.4%","대차잔고 760만주 ↓"],
-      one:"하방에 베팅하던 자금이 줄어 단기 수급엔 우호적."},
-    {t:"bad",rank:"중요도 3",h:"빚투·추격매수로 과열이 쌓이는 중",
-      stat:["신용잔고 2주 +10%","1주 평단 70.8만"],
-      one:"빚내서 비싸게 사는 비중↑ → 조정 시 반대매매로 낙폭이 커질 위험."},
+  const ICON_GOOD=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a8f60" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.5l5.5-5.5 4 4 6.5-7.5"/><path d="M20.5 5.5V9.5"/><path d="M20.5 5.5H16.5"/></svg>`;
+  const ICON_WARN=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cf7d1e" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5L21 19.5H3z"/><path d="M12 10v4"/><path d="M12 16.8v.2"/></svg>`;
+  const cards=[
+    {t:"good",tag:"가장 중요",icon:ICON_GOOD,
+      title:"전문 투자기관이 계속 사고 있어요",
+      desc:"큰 기관들이 8일 연속 사들였고, 외국인이 파는 양도 점점 줄었어요."},
+    {t:"good",tag:"좋은 신호",icon:ICON_GOOD,
+      title:"주가가 내릴 거란 베팅이 빠지고 있어요",
+      desc:"“값이 떨어질 것”에 걸어둔 돈이 최근 크게 줄었어요."},
+    {t:"warn",tag:"주의할 점",icon:ICON_WARN,
+      title:"빚내서 사는 사람이 늘었어요",
+      desc:"요즘은 다소 비싸게 사는 구간이라, 가격이 흔들리면 평소보다 크게 출렁일 수 있어요."},
   ];
   return `
-  <div class="verdict"><span class="vc vc-good">호재 2</span><span class="vc vc-bad">악재 1</span>
-    <span class="vt">수급은 우호적, 과열이 변수</span></div>
-  ${items.map(it=>`
-    <div class="tri ${it.t}">
-      <div class="tri-top">
-        <span class="tri-badge ${it.t==='good'?'b-good':'b-bad'}">${it.t==='good'?'▲ 호재':'▼ 악재'}</span>
-        <span class="tri-rank">${it.rank}</span>
+  <div class="mood">
+    <div class="ml">지금 분위기</div>
+    <div class="mt">대체로 긍정적이에요<br>다만 ‘과열’은 살펴보세요</div>
+    <div class="mbar"><span class="mseg on"></span><span class="mseg on"></span><span class="mseg warn"></span></div>
+    <div class="mlabels"><span>좋은 신호 2</span><span class="warn">주의 1</span></div>
+  </div>
+  ${cards.map(c=>`
+    <div class="kcard">
+      <div class="kicon ${c.t}">${c.icon}</div>
+      <div class="kbody">
+        <span class="ktag ${c.t}">${c.tag}</span>
+        <p class="ktitle">${c.title}</p>
+        <p class="kdesc">${c.desc}</p>
       </div>
-      <p class="tri-h">${it.h}</p>
-      <div class="tri-stat">${it.stat.map(s=>`<span class="ts">${s}</span>`).join("")}</div>
-      <p class="tri-one">${it.one}</p>
     </div>`).join("")}
-  <div class="src">출처: MTS 투자자탭·신용·공매도·평균단가(목업) · 매수/매도 권유가 아닙니다.</div>`;}
+  <p class="knote">쉽게 풀어 쓴 참고 정보예요 · 투자 권유가 아니에요</p>`;}
 
 /* ---------- C1 한눈 스코어보드 ---------- */
 function c1(){return `
@@ -348,7 +355,7 @@ function gaugeSvg(score,color){const C=2*Math.PI*46,off=C*(1-score/100);
     <circle cx="54" cy="54" r="46" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 54 54)"/></svg>`;}
 
 const CONCEPTS=[
-  {id:"c0",label:"핵심 3 · 호재/악재",ttl:"핵심 3 · 호재 / 악재",desc:"가장 중요한 <b>3개를 호재·악재</b>로 구분.",fn:c0,nw:1},
+  {id:"c0",label:"핵심 3가지",ttl:"오늘의 핵심 3가지",desc:"가장 중요한 <b>3가지를 쉽게</b> 정리.",fn:c0,nw:1},
   {id:"c1",label:"한눈 스코어보드",ttl:"한눈 요약 · 현대차",desc:"<b>배지 4개 + 점수</b>로 핵심만. 텍스트 최소.",fn:c1,nw:0},
   {id:"c2",label:"빚투 온도계",ttl:"빚투(신용융자) 온도",desc:"<b>신용잔고·잔고율·공여율</b>로 빚투 과열도.",fn:c2,nw:1},
   {id:"c3",label:"공매도 압력",ttl:"공매도 압력",desc:"<b>공매도비율·대차잔고</b> 추세로 숏 압력.",fn:c3short,nw:1},
