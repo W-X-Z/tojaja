@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>투자자탭 AI 인사이트 · 바텀시트 프로토타입 v2</title>
+<title>일별탭 AI 인사이트 · 바텀시트 프로토타입 v3</title>
 <style>
   :root{
     --up:#e23b3b; --down:#2f6fe8; --warn:#e8973a; --good:#1f9d6b;
@@ -30,7 +30,10 @@
   .control .badge-new{font-size:9.5px;font-weight:800;color:#fff;background:var(--good);border-radius:4px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
 
   .phone{position:relative;width:360px;height:780px;border-radius:38px;overflow:hidden;background:#000;border:10px solid #0c0d10;box-shadow:0 24px 60px rgba(20,24,33,.28);}
-  .phone img.screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none;}
+  .phone img.screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none;transition:opacity .22s;}
+  .phone img.screen.fade{opacity:0;}
+  .land-chip{position:absolute;top:118px;left:50%;transform:translateX(-50%);z-index:5;background:rgba(17,20,24,.88);color:#fff;font-size:11.5px;font-weight:700;padding:7px 14px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+  .land-chip.show{opacity:1;}
   .fab{position:absolute;right:16px;bottom:96px;z-index:6;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:0;cursor:pointer;padding:12px 16px;border-radius:999px;font-size:14px;font-weight:700;box-shadow:0 8px 22px rgba(17,20,24,.4);transition:transform .15s,opacity .2s;}
   .fab:active{transform:scale(.96);}
   .fab .spark{width:15px;height:15px;background:#ffd34d;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);}
@@ -61,7 +64,10 @@
   .mood .mseg.on{background:#28a36f;}
   .mood .mseg.warn{background:#e8973a;}
   .mood .mlabels{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--ink3);margin-top:7px;}
-  .kcard{display:flex;gap:13px;padding:15px;border-radius:18px;background:#fff;border:1px solid #eef0f3;box-shadow:0 6px 16px rgba(20,24,33,.05);margin-bottom:11px;}
+  .kcard{display:flex;gap:13px;padding:15px;border-radius:18px;background:#fff;border:1px solid #eef0f3;box-shadow:0 6px 16px rgba(20,24,33,.05);margin-bottom:11px;width:100%;text-align:left;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;font:inherit;color:inherit;}
+  .kcard:active{transform:scale(.985);}
+  .kcard:hover{border-color:#d5dae3;box-shadow:0 8px 20px rgba(20,24,33,.08);}
+  .kcard .kgo{margin-left:auto;align-self:center;font-size:11px;font-weight:700;color:var(--ink3);white-space:nowrap;}
   .kicon{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
   .kicon.good{background:#e7f6ee;}
   .kicon.warn{background:#fdf1e3;}
@@ -155,18 +161,22 @@
 </head>
 <body>
   <div class="head">
-    <h1>투자자탭 AI 인사이트 · v2</h1>
-    <p>텍스트는 줄이고 시각 중심으로 · 신용/공매도/기관세부 데이터 반영 (현대차 751,000)</p>
+    <h1>일별탭 AI 인사이트 · v3</h1>
+    <p>일별탭 진입 · 핵심 3가지 카드 탭 시 해당 화면으로 이동 (현대차 751,000)</p>
   </div>
 
   <div class="control">
-    <div class="cl">콘텐츠 컨셉 (프로토타입엔 1개만 노출)</div>
+    <div class="cl">현재 화면 (프로토타입)</div>
+    <div class="pills" id="screenPills"></div>
+    <div class="desc" id="screenDesc"></div>
+    <div class="cl" style="margin-top:14px">콘텐츠 컨셉 (바텀시트)</div>
     <div class="pills" id="pills"></div>
     <div class="desc" id="desc"></div>
   </div>
 
   <div class="phone" id="phone">
-    <img class="screen" src="Screenshot_20260601_163222.jpg" alt="MTS 투자자탭 화면" />
+    <img class="screen" id="screenImg" src="Screenshot_20260601_163159.jpg" alt="MTS 일별탭 화면" />
+    <div class="land-chip" id="landChip"></div>
     <button class="fab" id="fab"><span class="spark"></span>AI 요약</button>
     <div class="backdrop" id="backdrop"></div>
     <div class="sheet" id="sheet">
@@ -176,23 +186,31 @@
     </div>
   </div>
 
-  <p class="head" style="margin-top:18px;color:var(--ink3);font-size:12px;max-width:420px;line-height:1.6">위 컨트롤에서 컨셉을 고르고, 폰의 <b>AI 요약</b>을 누르면 해당 컨셉이 바텀시트로 떠요. 데이터는 스크린샷 기반 목업입니다.</p>
+  <p class="head" style="margin-top:18px;color:var(--ink3);font-size:12px;max-width:420px;line-height:1.6">폰에서 <b>AI 요약</b> → 카드를 누르면 해당 탭 화면으로 이동해요. (투자자 / 일별·공매도 / 일별·신용)</p>
 
 <script>
-const state={concept:"c0",subject:"foreign"};
+const state={concept:"c0",subject:"foreign",screen:"daily"};
+
+/* 화면(탭) 목록 — 카드 클릭 시 랜딩 */
+const SCREENS={
+  daily:{id:"daily",label:"일별·매매",img:"Screenshot_20260601_163159.jpg",desc:"AI 요약 진입 화면 (일별탭)",chip:"일별 · 매매"},
+  investor:{id:"investor",label:"투자자",img:"Screenshot_20260601_163222.jpg",desc:"외국인·개인·기관 순매수",chip:"투자자 탭"},
+  short:{id:"short",label:"일별·공매도",img:"Screenshot_20260601_163207.jpg",desc:"공매도·대차 데이터",chip:"일별 · 공매도"},
+  credit:{id:"credit",label:"일별·신용",img:"Screenshot_20260601_163204.jpg",desc:"신용(빚투) 잔고·공여율",chip:"일별 · 신용"},
+};
 
 /* ---------- C0 핵심 3가지 (초보자용) ---------- */
 function c0(){
   const ICON_GOOD=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a8f60" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.5l5.5-5.5 4 4 6.5-7.5"/><path d="M20.5 5.5V9.5"/><path d="M20.5 5.5H16.5"/></svg>`;
   const ICON_WARN=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cf7d1e" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5L21 19.5H3z"/><path d="M12 10v4"/><path d="M12 16.8v.2"/></svg>`;
   const cards=[
-    {t:"good",tag:"가장 중요",icon:ICON_GOOD,
-      title:"전문 투자기관이 계속 사고 있어요",
-      desc:"큰 기관들이 8일 연속 사들였고, 외국인이 파는 양도 점점 줄었어요."},
-    {t:"good",tag:"좋은 신호",icon:ICON_GOOD,
+    {t:"good",tag:"가장 중요",icon:ICON_GOOD,land:"investor",
+      title:"기관이 계속 사고 있어요",
+      desc:"기관들이 8일 연속 사들였고, 외국인이 파는 양도 점점 줄었어요."},
+    {t:"good",tag:"좋은 신호",icon:ICON_GOOD,land:"short",
       title:"주가가 내릴 거란 베팅이 빠지고 있어요",
-      desc:"“값이 떨어질 것”에 걸어둔 돈이 최근 크게 줄었어요."},
-    {t:"warn",tag:"주의할 점",icon:ICON_WARN,
+      desc:"공매도 자금이 최근 크게 줄었어요."},
+    {t:"warn",tag:"주의할 점",icon:ICON_WARN,land:"credit",
       title:"빚내서 사는 사람이 늘었어요",
       desc:"요즘은 다소 비싸게 사는 구간이라, 가격이 흔들리면 평소보다 크게 출렁일 수 있어요."},
   ];
@@ -204,15 +222,16 @@ function c0(){
     <div class="mlabels"><span>좋은 신호 2</span><span class="warn">주의 1</span></div>
   </div>
   ${cards.map(c=>`
-    <div class="kcard">
+    <button type="button" class="kcard" data-land="${c.land}">
       <div class="kicon ${c.t}">${c.icon}</div>
       <div class="kbody">
         <span class="ktag ${c.t}">${c.tag}</span>
         <p class="ktitle">${c.title}</p>
         <p class="kdesc">${c.desc}</p>
       </div>
-    </div>`).join("")}
-  <p class="knote">쉽게 풀어 쓴 참고 정보예요 · 투자 권유가 아니에요</p>`;}
+      <span class="kgo">자세히 ›</span>
+    </button>`).join("")}
+  <p class="knote">카드를 누르면 관련 화면으로 이동해요 · 투자 권유가 아니에요</p>`;}
 
 /* ---------- C1 한눈 스코어보드 ---------- */
 function c1(){return `
@@ -368,13 +387,45 @@ const CONCEPTS=[
 
 const $=id=>document.getElementById(id);
 const cur=()=>CONCEPTS.find(c=>c.id===state.concept);
+let landTimer=null;
+
+function renderScreenPills(){
+  $("screenPills").innerHTML=Object.values(SCREENS).map(s=>
+    `<button type="button" data-screen="${s.id}" class="${s.id===state.screen?'on':''}">${s.label}</button>`).join("");
+  $("screenDesc").innerHTML=`<b>${SCREENS[state.screen].chip}</b> · ${SCREENS[state.screen].desc}`;
+}
+function setScreen(id,{toast=true}={}){
+  const sc=SCREENS[id];if(!sc)return;
+  state.screen=id;
+  const img=$("screenImg");
+  img.classList.add("fade");
+  setTimeout(()=>{
+    img.src=sc.img;
+    img.alt=sc.chip;
+    img.onload=()=>img.classList.remove("fade");
+    img.onerror=()=>img.classList.remove("fade");
+  },120);
+  renderScreenPills();
+  if(toast){
+    const chip=$("landChip");
+    chip.textContent=`${sc.chip} 화면`;
+    chip.classList.add("show");
+    clearTimeout(landTimer);
+    landTimer=setTimeout(()=>chip.classList.remove("show"),2200);
+  }
+}
+function navigateTo(landId){
+  closeSheet();
+  setTimeout(()=>setScreen(landId),280);
+}
 function renderPills(){
-  $("pills").innerHTML=CONCEPTS.map(c=>`<button data-c="${c.id}" class="${c.id===state.concept?'on':''}">${c.label}${c.nw?'<span class="badge-new">NEW</span>':''}</button>`).join("");
+  $("pills").innerHTML=CONCEPTS.map(c=>`<button type="button" data-c="${c.id}" class="${c.id===state.concept?'on':''}">${c.label}${c.nw?'<span class="badge-new">NEW</span>':''}</button>`).join("");
   $("desc").innerHTML=cur().desc;
 }
 function renderSheet(){const c=cur();$("shTtl").textContent=c.ttl;$("shBody").innerHTML=c.fn();$("shBody").scrollTop=0;}
-renderPills();renderSheet();
+renderScreenPills();renderPills();renderSheet();
 
+$("screenPills").addEventListener("click",e=>{const b=e.target.closest("[data-screen]");if(!b)return;setScreen(b.dataset.screen);});
 $("pills").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;
   state.concept=b.dataset.c;state.subject="foreign";renderPills();renderSheet();});
 function openSheet(){$("backdrop").classList.add("show");$("sheet").classList.add("show");$("fab").style.opacity="0";$("fab").style.pointerEvents="none";$("shBody").scrollTop=0;}
@@ -382,7 +433,12 @@ function closeSheet(){$("backdrop").classList.remove("show");$("sheet").classLis
 $("fab").addEventListener("click",openSheet);
 $("backdrop").addEventListener("click",closeSheet);
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",closeSheet));
-$("shBody").addEventListener("click",e=>{const s=e.target.closest("[data-subj]");if(s){state.subject=s.dataset.subj;renderSheet();}});
+$("shBody").addEventListener("click",e=>{
+  const land=e.target.closest("[data-land]");
+  if(land){navigateTo(land.dataset.land);return;}
+  const s=e.target.closest("[data-subj]");
+  if(s){state.subject=s.dataset.subj;renderSheet();}
+});
 </script>
 </body>
 </html>
