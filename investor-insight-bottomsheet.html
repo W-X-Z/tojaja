@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>투자자탭 AI 인사이트 · 바텀시트 프로토타입 v2</title>
+<style>
+  :root{
+    --up:#e23b3b; --down:#2f6fe8; --warn:#e8973a; --good:#1f9d6b;
+    --ink:#15171c; --ink2:#5a606b; --ink3:#9298a3; --line:#ebecf0;
+    --bg:#eef0f4; --card:#fff; --soft:#f6f7f9; --accent:#111418;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 16px 48px;
+  }
+  .head{text-align:center;margin-bottom:16px;}
+  .head h1{font-size:18px;margin:0 0 4px;letter-spacing:-.2px;}
+  .head p{margin:0;color:var(--ink2);font-size:13px;}
+
+  .control{width:100%;max-width:600px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:22px;}
+  .control .cl{font-size:11px;font-weight:800;letter-spacing:.4px;color:var(--ink3);margin-bottom:9px;}
+  .pills{display:flex;flex-wrap:wrap;gap:7px;}
+  .pills button{border:1px solid var(--line);background:#fff;cursor:pointer;border-radius:99px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--ink2);transition:all .14s;}
+  .pills button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .control .desc{margin-top:11px;font-size:12.5px;color:var(--ink2);line-height:1.5;}
+  .control .desc b{color:var(--ink);}
+  .control .badge-new{font-size:9.5px;font-weight:800;color:#fff;background:var(--good);border-radius:4px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
+
+  .phone{position:relative;width:360px;height:780px;border-radius:38px;overflow:hidden;background:#000;border:10px solid #0c0d10;box-shadow:0 24px 60px rgba(20,24,33,.28);}
+  .phone img.screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none;}
+  .fab{position:absolute;right:16px;bottom:96px;z-index:6;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:0;cursor:pointer;padding:12px 16px;border-radius:999px;font-size:14px;font-weight:700;box-shadow:0 8px 22px rgba(17,20,24,.4);transition:transform .15s,opacity .2s;}
+  .fab:active{transform:scale(.96);}
+  .fab .spark{width:15px;height:15px;background:#ffd34d;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);}
+  .backdrop{position:absolute;inset:0;z-index:7;background:rgba(10,12,16,.42);opacity:0;pointer-events:none;transition:opacity .25s;}
+  .backdrop.show{opacity:1;pointer-events:auto;}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:8;background:var(--card);border-radius:22px 22px 0 0;display:flex;flex-direction:column;max-height:82%;transform:translateY(103%);transition:transform .32s cubic-bezier(.22,1,.36,1);}
+  .sheet.show{transform:translateY(0);}
+  .grip{width:40px;height:4px;border-radius:99px;background:#d7dae1;margin:9px auto 6px;flex-shrink:0;}
+  .sh-head{display:flex;align-items:center;gap:8px;padding:6px 18px 12px;border-bottom:1px solid var(--line);flex-shrink:0;}
+  .sh-head .tag{font-size:10.5px;font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:2px 6px;letter-spacing:.4px;}
+  .sh-head .ttl{font-size:14px;font-weight:800;letter-spacing:-.2px;}
+  .sh-head .close{margin-left:auto;border:0;background:#f1f2f5;color:var(--ink2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;}
+  .sh-body{padding:16px 18px 22px;overflow-y:auto;}
+
+  /* 공용 — 시각 우선, 텍스트 최소 */
+  .up{color:var(--up);}.down{color:var(--down);}.warn{color:var(--warn);}.good{color:var(--good);}
+  .oneline{font-size:13px;line-height:1.5;color:var(--ink2);margin:14px 0 0;}
+  .oneline b{color:var(--ink);}
+  .src{font-size:10px;color:var(--ink3);margin-top:12px;}
+  .headline{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.45;margin:0 0 16px;}
+
+  /* 핵심 3 (호재/악재) */
+  .verdict{display:flex;align-items:center;gap:8px;margin:0 0 14px;}
+  .verdict .vc{font-size:13px;font-weight:800;padding:5px 12px;border-radius:99px;}
+  .vc-good{background:#fdecec;color:var(--up);}
+  .vc-bad{background:#e9f0fe;color:var(--down);}
+  .verdict .vt{font-size:12px;color:var(--ink2);}
+  .tri{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:13px 14px;margin-bottom:10px;}
+  .tri.good{border-left-color:var(--up);}
+  .tri.bad{border-left-color:var(--down);}
+  .tri-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .tri-badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;}
+  .b-good{background:#fdecec;color:var(--up);}
+  .b-bad{background:#e9f0fe;color:var(--down);}
+  .tri-rank{margin-left:auto;font-size:11px;font-weight:700;color:var(--ink3);}
+  .tri-h{font-size:14.5px;font-weight:800;letter-spacing:-.3px;margin:0 0 9px;line-height:1.35;}
+  .tri-stat{display:inline-flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+  .tri-stat .ts{font-size:11.5px;font-weight:700;background:var(--soft);border-radius:7px;padding:4px 9px;}
+  .tri-one{font-size:12px;color:var(--ink2);line-height:1.45;margin:0;}
+
+  /* 배지 그리드 (스코어보드) */
+  .bgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .sigcard{border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;flex-direction:column;gap:6px;}
+  .sigcard .si-top{display:flex;align-items:center;gap:7px;}
+  .sigcard .dot{width:8px;height:8px;border-radius:50%;}
+  .sigcard .si-l{font-size:12px;font-weight:700;color:var(--ink2);}
+  .sigcard .si-v{font-size:15px;font-weight:800;letter-spacing:-.3px;}
+  .sigcard .si-s{font-size:11px;color:var(--ink3);}
+  .d-up{background:var(--up);}.d-dn{background:var(--down);}.d-wn{background:var(--warn);}.d-gd{background:var(--good);}
+
+  /* 큰 스탯 3분할 */
+  .stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .stat3 .s{background:var(--soft);border-radius:12px;padding:12px 8px;text-align:center;}
+  .stat3 .s .n{font-size:18px;font-weight:800;letter-spacing:-.5px;}
+  .stat3 .s .l{font-size:11px;color:var(--ink3);margin-top:3px;}
+
+  /* 온도계 / 게이지 */
+  .thermo{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+  .gauge{position:relative;width:104px;height:104px;flex-shrink:0;}
+  .gauge .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge .val .n{font-size:25px;font-weight:800;letter-spacing:-1px;}
+  .gauge .val .s{font-size:10px;color:var(--ink3);}
+  .thermo .lv{font-size:11px;color:var(--ink3);margin-bottom:3px;}
+  .thermo .lvb{font-size:18px;font-weight:800;letter-spacing:-.3px;}
+  .trend{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;background:var(--soft);border-radius:7px;padding:4px 9px;margin-top:6px;}
+
+  /* 다이버징 막대 (기관 해부) */
+  .dbar{margin-bottom:10px;}
+  .dbar .db-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+  .dbar .db-n{font-weight:700;}
+  .dbar .db-v{font-weight:800;}
+  .axisbar{position:relative;height:10px;background:var(--soft);border-radius:99px;}
+  .axisbar .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line);}
+  .axisbar .seg{position:absolute;top:0;bottom:0;border-radius:99px;}
+
+  /* 손바뀜 다이어그램 */
+  .flowmap{display:flex;align-items:stretch;gap:10px;}
+  .fnode{flex:1;border-radius:13px;padding:13px 12px;text-align:center;border:1px solid var(--line);}
+  .fnode.sell{background:#eaf1fe;border-color:#cfe0fb;}
+  .fnode.buy{background:#fdeceb;border-color:#f6d3cf;}
+  .fnode .fn-l{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px;}
+  .fnode .fn-v{font-size:17px;font-weight:800;letter-spacing:-.5px;}
+  .farrow{display:flex;align-items:center;font-size:20px;color:var(--ink3);}
+  .subnode{display:flex;gap:8px;margin-top:9px;}
+  .subnode .sn{flex:1;background:var(--soft);border-radius:10px;padding:9px;text-align:center;font-size:11px;color:var(--ink2);}
+  .subnode .sn b{display:block;font-size:13px;margin-top:2px;}
+
+  /* 평단 사다리 */
+  .ladder{position:relative;height:210px;border-left:2px solid var(--line);margin:6px 0 6px 6px;}
+  .rung{position:absolute;left:-2px;width:100%;}
+  .rung .bar{height:2px;background:#cfd3da;width:100%;}
+  .rung .info{position:absolute;left:10px;top:-12px;display:flex;align-items:baseline;gap:7px;}
+  .rung .info .rl{font-size:12px;color:var(--ink2);}
+  .rung .info .rp{font-size:14px;font-weight:800;}
+  .rung .info .rd{font-size:11px;font-weight:700;padding:1px 6px;border-radius:99px;}
+  .rd-up{background:#fdecec;color:var(--up);}
+  .rung.now .bar{background:var(--up);height:3px;}
+  .rung.now .rp{color:var(--up);}
+
+  /* 점수 막대 */
+  .bar-row{margin-bottom:10px;}
+  .bar-row .br-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+  .bar-row .bn{color:var(--ink2);}.bar-row .bv{font-weight:700;}
+  .track{height:7px;background:#edeef2;border-radius:99px;overflow:hidden;}.fillb{height:100%;border-radius:99px;}
+
+  /* 주체 서브탭 */
+  .subtabs{display:flex;gap:6px;margin-bottom:14px;}
+  .subtabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 4px;font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;}
+  .subtabs button.on{background:#10131a;color:#fff;border-color:#10131a;}
+  .who-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .who-head .nm{font-size:17px;font-weight:800;}
+  .who-head .pl{margin-left:auto;font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;}
+  .pill-up{background:#fdecec;color:var(--up);}.pill-dn{background:#e9f0fe;color:var(--down);}
+  .role{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;}
+  .role.smart{background:#e7f5ef;color:var(--good);}.role.exit{background:#e9f0fe;color:var(--down);}
+  .role.hot{background:#fdf0e3;color:var(--warn);}.role.pass{background:#eef0f3;color:var(--ink2);}
+  .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .kv .k{color:var(--ink2);}.kv .v{font-weight:700;}
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>투자자탭 AI 인사이트 · v2</h1>
+    <p>텍스트는 줄이고 시각 중심으로 · 신용/공매도/기관세부 데이터 반영 (현대차 751,000)</p>
+  </div>
+
+  <div class="control">
+    <div class="cl">콘텐츠 컨셉 (프로토타입엔 1개만 노출)</div>
+    <div class="pills" id="pills"></div>
+    <div class="desc" id="desc"></div>
+  </div>
+
+  <div class="phone" id="phone">
+    <img class="screen" src="Screenshot_20260601_163222.jpg" alt="MTS 투자자탭 화면" />
+    <button class="fab" id="fab"><span class="spark"></span>AI 요약</button>
+    <div class="backdrop" id="backdrop"></div>
+    <div class="sheet" id="sheet">
+      <div class="grip"></div>
+      <div class="sh-head"><span class="tag">AI</span><span class="ttl" id="shTtl"></span><button class="close" data-close>&times;</button></div>
+      <div class="sh-body" id="shBody"></div>
+    </div>
+  </div>
+
+  <p class="head" style="margin-top:18px;color:var(--ink3);font-size:12px;max-width:420px;line-height:1.6">위 컨트롤에서 컨셉을 고르고, 폰의 <b>AI 요약</b>을 누르면 해당 컨셉이 바텀시트로 떠요. 데이터는 스크린샷 기반 목업입니다.</p>
+
+<script>
+const state={concept:"c0",subject:"foreign"};
+
+/* ---------- C0 핵심 3 (호재·악재) ---------- */
+function c0(){
+  const items=[
+    {t:"good",rank:"중요도 1",h:"기관이 받치고, 외국인 매도는 힘 빠지는 중",
+      stat:["기관 8거래일 연속 매수","외국인 −16→−12만주/일"],
+      one:"파는 힘(외국인)은 약해지고 받치는 힘(기관)은 강해지는, 상승의 핵심 동력."},
+    {t:"good",rank:"중요도 2",h:"공매도가 발을 빼고 있어요",
+      stat:["공매도비율 5.5%→1.4%","대차잔고 760만주 ↓"],
+      one:"하방에 베팅하던 자금이 줄어 단기 수급엔 우호적."},
+    {t:"bad",rank:"중요도 3",h:"빚투·추격매수로 과열이 쌓이는 중",
+      stat:["신용잔고 2주 +10%","1주 평단 70.8만"],
+      one:"빚내서 비싸게 사는 비중↑ → 조정 시 반대매매로 낙폭이 커질 위험."},
+  ];
+  return `
+  <div class="verdict"><span class="vc vc-good">호재 2</span><span class="vc vc-bad">악재 1</span>
+    <span class="vt">수급은 우호적, 과열이 변수</span></div>
+  ${items.map(it=>`
+    <div class="tri ${it.t}">
+      <div class="tri-top">
+        <span class="tri-badge ${it.t==='good'?'b-good':'b-bad'}">${it.t==='good'?'▲ 호재':'▼ 악재'}</span>
+        <span class="tri-rank">${it.rank}</span>
+      </div>
+      <p class="tri-h">${it.h}</p>
+      <div class="tri-stat">${it.stat.map(s=>`<span class="ts">${s}</span>`).join("")}</div>
+      <p class="tri-one">${it.one}</p>
+    </div>`).join("")}
+  <div class="src">출처: MTS 투자자탭·신용·공매도·평균단가(목업) · 매수/매도 권유가 아닙니다.</div>`;}
+
+/* ---------- C1 한눈 스코어보드 ---------- */
+function c1(){return `
+  <p class="headline">기관이 받치고 <span class="warn">빚투</span>가 끌어올린 상승<br>— 단기 과열 신호가 섞여 있어요.</p>
+  <div class="bgrid">
+    <div class="sigcard"><div class="si-top"><span class="dot d-dn"></span><span class="si-l">외국인</span></div>
+      <div class="si-v down">매도 둔화</div><div class="si-s">일평균 −16.3→−12.2만주</div></div>
+    <div class="sigcard"><div class="si-top"><span class="dot d-up"></span><span class="si-l">기관</span></div>
+      <div class="si-v up">매수 가속</div><div class="si-s">8거래일 연속 순매수</div></div>
+    <div class="sigcard"><div class="si-top"><span class="dot d-wn"></span><span class="si-l">신용융자</span></div>
+      <div class="si-v warn">빚투 과열</div><div class="si-s">잔고 2주 +10%</div></div>
+    <div class="sigcard"><div class="si-top"><span class="dot d-gd"></span><span class="si-l">공매도</span></div>
+      <div class="si-v good">압력 완화</div><div class="si-s">비율 5.5%→1.4%</div></div>
+  </div>
+  <div class="bar-row" style="margin-top:16px"><div class="br-top"><span class="bn">수급 종합 점수</span><span class="bv">56 / 100</span></div>
+    <div class="track"><div class="fillb" style="width:56%;background:var(--warn)"></div></div></div>
+  <p class="oneline"><b>한 줄:</b> 매도 주체는 힘이 빠지지만, 빚투·추격매수로 <b>과열</b>도 함께 쌓이는 국면.</p>
+  <div class="src">출처: MTS 투자자탭(목업)</div>`;}
+
+/* ---------- C2 빚투 온도계 (신용융자) ---------- */
+function c2(){
+  const score=72,C=2*Math.PI*46,off=C*(1-score/100);
+  return `
+  <div class="thermo"><div class="gauge">
+    <svg width="104" height="104" viewBox="0 0 108 108">
+      <circle cx="54" cy="54" r="46" fill="none" stroke="#edeef2" stroke-width="11"/>
+      <circle cx="54" cy="54" r="46" fill="none" stroke="var(--warn)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 54 54)"/></svg>
+    <div class="val"><div class="n warn">72</div><div class="s">과열도</div></div></div>
+    <div><div class="lv">빚투 온도</div><div class="lvb warn">과열 구간</div>
+      <span class="trend">신용잔고 2주 <b class="up">+10%</b> ↑</span></div></div>
+  <div class="stat3">
+    <div class="s"><div class="n">232<span style="font-size:11px">만주</span></div><div class="l">신용잔고</div></div>
+    <div class="s"><div class="n">1.12<span style="font-size:11px">%</span></div><div class="l">잔고율</div></div>
+    <div class="s"><div class="n">28.7<span style="font-size:11px">%</span></div><div class="l">공여율</div></div>
+  </div>
+  <p class="oneline"><b>한 줄:</b> 빚내서 사는 돈이 빠르게 늘었어요. 주가가 밀리면 <b>반대매매</b>로 낙폭이 커질 수 있는 구조예요.</p>
+  <div class="src">출처: MTS 일별 신용(융자) 데이터(목업) · 잔고율=신용잔고/상장주식수</div>`;}
+
+/* ---------- C3 공매도 압력 ---------- */
+function c3short(){return `
+  <div class="thermo"><div class="gauge">
+    ${gaugeSvg(28,"var(--good)")}
+    <div class="val"><div class="n good">낮음</div><div class="s">숏 압력</div></div></div>
+    <div><div class="lv">공매도 비율</div><div class="lvb">1.4<span style="font-size:13px">%</span></div>
+      <span class="trend">최근 <b class="good">5.5%→1.4%</b> ↓</span></div></div>
+  <div class="stat3">
+    <div class="s"><div class="n down">▼</div><div class="l">공매도비율</div></div>
+    <div class="s"><div class="n">760<span style="font-size:11px">만주</span></div><div class="l">대차잔고</div></div>
+    <div class="s"><div class="n down">▼</div><div class="l">대차잔고 추세</div></div>
+  </div>
+  <p class="oneline"><b>한 줄:</b> 하방에 베팅하던 자금이 발을 빼는 중 → 단기 수급엔 우호적. 단, 대차잔고 <b>760만주</b>는 잠재 매물.</p>
+  <div class="src">출처: MTS 공매도/대차 데이터(목업)</div>`;}
+
+/* ---------- C4 기관 해부 ---------- */
+function c4(){
+  const rows=[["금융투자(증권사)",163,"up"],["기타법인",127,"up"],["투신",40,"up"],["사모펀드",1.4,"up"],["보험",-24,"down"]];
+  const max=170;
+  return `
+  <p class="headline">기관 매수, <span class="up">누가</span> 진짜 샀나?</p>
+  ${rows.map(([n,v,c])=>{
+    const w=Math.min(48,Math.abs(v)/max*48);
+    const left=v>=0?50:50-w, color=v>=0?"var(--up)":"var(--down)";
+    return `<div class="dbar"><div class="db-top"><span class="db-n">${n}</span><span class="db-v ${c}">${v>0?'+':''}${v}만주</span></div>
+      <div class="axisbar"><div class="mid"></div><div class="seg" style="left:${left}%;width:${w}%;background:${color}"></div></div></div>`;
+  }).join("")}
+  <p class="oneline"><b>한 줄:</b> 매수 주도는 <b>증권사 자기매매(금융투자)</b> — 단기 트레이딩 성격이에요. 연기금 같은 <b>장기자금 유입은 아직</b>이라 색깔을 구분해 볼 필요가 있어요.</p>
+  <div class="src">출처: MTS 투자자 세부(6개월 누적, 목업)</div>`;}
+
+/* ---------- C5 손바뀜 구조 ---------- */
+function c5(){return `
+  <p class="headline">6개월 손바뀜 구조</p>
+  <div class="flowmap">
+    <div class="fnode sell"><div class="fn-l down">외국인</div><div class="fn-v down">−2,052만주</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode buy"><div class="fn-l up">개인</div><div class="fn-v up">+1,826만주</div></div>
+  </div>
+  <div class="subnode">
+    <div class="sn down">프로그램<b class="down">−1,522만</b></div>
+    <div class="sn up">기관계<b class="up">+88만</b></div>
+    <div class="sn warn">신용(빚투)<b class="warn">+10%↑</b></div>
+  </div>
+  <p class="oneline"><b>한 줄:</b> 외국인·프로그램이 던진 물량을 <b>개인이 받아내는</b> 구조. 그 매수의 상당 부분이 <b>빚투</b>라는 점이 핵심 리스크예요.</p>
+  <div class="src">출처: MTS 투자자탭 6개월 누적(목업)</div>`;}
+
+/* ---------- C6 추격매수 평단 사다리 ---------- */
+function c6(){
+  const min=63, max=77; // 만원
+  const pos=v=>`${100-((v-min)/(max-min)*100)}%`;
+  return `
+  <p class="headline">지금 사면 <span class="up">얼마나 비싼</span> 걸까?</p>
+  <div class="ladder">
+    <div class="rung now" style="top:${pos(75.1)}"><div class="bar"></div><div class="info"><span class="rl">현재가</span><span class="rp">75.1만</span></div></div>
+    <div class="rung" style="top:${pos(70.8)}"><div class="bar"></div><div class="info"><span class="rl">1주 평단</span><span class="rp">70.8만</span><span class="rd rd-up">+6%</span></div></div>
+    <div class="rung" style="top:${pos(65.9)}"><div class="bar"></div><div class="info"><span class="rl">1개월 평단</span><span class="rp">65.9만</span><span class="rd rd-up">+14%</span></div></div>
+  </div>
+  <p class="oneline"><b>한 줄:</b> 한 달 전 매수자는 +14% 수익이지만, <b>최근 일주일 진입자도 평단 70.8만</b> — 다들 점점 비싸게 사고 있어요.</p>
+  <div class="src">출처: MTS 투자자 평균단가 1주·1개월(목업, 4주체 평균)</div>`;}
+
+/* ---------- C7 수급 점수 ---------- */
+function c7(){
+  const bars=[["기관 매집 강도",80,"var(--good)"],["외국인 흐름",40,"var(--down)"],
+    ["빚투/개인 과열(역지표)",30,"var(--warn)"],["공매도 환경",65,"var(--good)"]];
+  return `
+  <div class="thermo"><div class="gauge">${gaugeSvg(56,"var(--warn)")}
+    <div class="val"><div class="n">56</div><div class="s">/ 100</div></div></div>
+    <div><div class="lv">종합 진단</div><div class="lvb" style="font-size:15px;line-height:1.3">기관 매집 + 과열 혼재</div></div></div>
+  ${bars.map(([n,v,c])=>`<div class="bar-row"><div class="br-top"><span class="bn">${n}</span><span class="bv">${v}</span></div>
+    <div class="track"><div class="fillb" style="width:${v}%;background:${c}"></div></div></div>`).join("")}
+  <p class="oneline"><b>한 줄:</b> 매집은 강하지만 빚투·추격매수로 과열 점수가 깎여 <b>중립~경계</b> 구간이에요.</p>
+  <div class="src">4개 신호 가중합(목업) · 매수/매도 신호가 아닙니다.</div>`;}
+
+/* ---------- C8 주체 속마음 (서브탭) ---------- */
+const SUBJ={
+  foreign:{nm:"외국인",role:'<span class="role exit">차익실현 둔화</span>',pl:'<span class="pl pill-up">+15%</span>',
+    kv:[["6개월 누적","−2,052만주"],["최근 매도","−12.2만주/일(둔화)"],["1개월 평단","65.4만원"]],
+    one:"보유를 크게 줄여 <b>추가 매도 강도 둔화</b> 중. 순매수 전환 시점이 분기점."},
+  inst:{nm:"기관",role:'<span class="role smart">매집(증권사 주도)</span>',pl:'<span class="pl pill-up">+13%</span>',
+    kv:[["6개월 누적","+88만주"],["연속 순매수","8거래일"],["주력","금융투자 +163만"]],
+    one:"매수 실체는 <b>증권사 자기매매</b> — 단기 성격. 연기금 등 장기자금은 아직."},
+  indiv:{nm:"개인",role:'<span class="role hot">빚투 동반 매수</span>',pl:'<span class="pl pill-up">+14%</span>',
+    kv:[["6개월 누적","+1,826만주"],["신용잔고","2주 +10%↑"],["1개월 평단","65.6만원"]],
+    one:"외국인 물량을 받지만 <b>빚투 비중↑</b>. 조정 시 반대매매가 변수."},
+  program:{nm:"프로그램",role:'<span class="role pass">패시브 이탈</span>',pl:'<span class="pl pill-dn">매도</span>',
+    kv:[["6개월 누적","−1,522만주"],["방향","외국인과 동행"],["성격","차익·패시브"]],
+    one:"외국인 매도와 같은 방향. 강도는 함께 둔화되는지 관찰."},
+};
+function c8(){
+  const s=SUBJ[state.subject];
+  const tabs=[["foreign","외국인"],["inst","기관"],["indiv","개인"],["program","프로그램"]];
+  return `
+  <div class="subtabs">${tabs.map(([k,l])=>`<button data-subj="${k}" class="${state.subject===k?'on':''}">${l}</button>`).join("")}</div>
+  <div class="who-head"><span class="nm">${s.nm}</span>${s.role}${s.pl}</div>
+  ${s.kv.map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}
+  <p class="oneline"><b>해석:</b> ${s.one}</p>
+  <div class="src">출처: MTS 투자자탭(목업) · 의도는 데이터 기반 추정</div>`;}
+
+function gaugeSvg(score,color){const C=2*Math.PI*46,off=C*(1-score/100);
+  return `<svg width="104" height="104" viewBox="0 0 108 108">
+    <circle cx="54" cy="54" r="46" fill="none" stroke="#edeef2" stroke-width="11"/>
+    <circle cx="54" cy="54" r="46" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 54 54)"/></svg>`;}
+
+const CONCEPTS=[
+  {id:"c0",label:"핵심 3 · 호재/악재",ttl:"핵심 3 · 호재 / 악재",desc:"가장 중요한 <b>3개를 호재·악재</b>로 구분.",fn:c0,nw:1},
+  {id:"c1",label:"한눈 스코어보드",ttl:"한눈 요약 · 현대차",desc:"<b>배지 4개 + 점수</b>로 핵심만. 텍스트 최소.",fn:c1,nw:0},
+  {id:"c2",label:"빚투 온도계",ttl:"빚투(신용융자) 온도",desc:"<b>신용잔고·잔고율·공여율</b>로 빚투 과열도.",fn:c2,nw:1},
+  {id:"c3",label:"공매도 압력",ttl:"공매도 압력",desc:"<b>공매도비율·대차잔고</b> 추세로 숏 압력.",fn:c3short,nw:1},
+  {id:"c4",label:"기관 해부",ttl:"기관 해부",desc:"<b>금융투자/투신/보험</b> 누가 진짜 샀나.",fn:c4,nw:1},
+  {id:"c5",label:"손바뀜 구조",ttl:"손바뀜 구조",desc:"외국인→개인 <b>물량 이동 다이어그램</b>.",fn:c5,nw:0},
+  {id:"c6",label:"추격매수 사다리",ttl:"추격매수 평단 사다리",desc:"현재가 vs <b>1주·1개월 평단</b> 위치.",fn:c6,nw:1},
+  {id:"c7",label:"수급 점수",ttl:"수급 건전성 점수",desc:"여러 신호를 <b>점수·등급</b>으로.",fn:c7,nw:0},
+  {id:"c8",label:"주체 속마음",ttl:"투자 주체 속마음",desc:"<b>주체별 서브탭</b>으로 압축.",fn:c8,nw:0},
+];
+
+const $=id=>document.getElementById(id);
+const cur=()=>CONCEPTS.find(c=>c.id===state.concept);
+function renderPills(){
+  $("pills").innerHTML=CONCEPTS.map(c=>`<button data-c="${c.id}" class="${c.id===state.concept?'on':''}">${c.label}${c.nw?'<span class="badge-new">NEW</span>':''}</button>`).join("");
+  $("desc").innerHTML=cur().desc;
+}
+function renderSheet(){const c=cur();$("shTtl").textContent=c.ttl;$("shBody").innerHTML=c.fn();$("shBody").scrollTop=0;}
+renderPills();renderSheet();
+
+$("pills").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;
+  state.concept=b.dataset.c;state.subject="foreign";renderPills();renderSheet();});
+function openSheet(){$("backdrop").classList.add("show");$("sheet").classList.add("show");$("fab").style.opacity="0";$("fab").style.pointerEvents="none";$("shBody").scrollTop=0;}
+function closeSheet(){$("backdrop").classList.remove("show");$("sheet").classList.remove("show");$("fab").style.opacity="1";$("fab").style.pointerEvents="auto";}
+$("fab").addEventListener("click",openSheet);
+$("backdrop").addEventListener("click",closeSheet);
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",closeSheet));
+$("shBody").addEventListener("click",e=>{const s=e.target.closest("[data-subj]");if(s){state.subject=s.dataset.subj;renderSheet();}});
+</script>
+</body>
+</html>
